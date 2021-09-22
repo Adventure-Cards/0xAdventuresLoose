@@ -6,29 +6,36 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
-import "./LootTokensMetadata.sol";
+import "./AdventureTokensMetadata.sol";
 
 interface ILootAirdrop {
     function claimForLoot(uint256) external payable;
-    function safeTransferFrom(address, address, uint256) external payable;
+
+    function safeTransferFrom(
+        address,
+        address,
+        uint256
+    ) external payable;
 }
 
 library Errors {
-    string constant DoesNotOwnLootbag = "you do not own the lootbag for this airdrop";
-    string constant IsNotLoot = "msg.sender is not the loot contract";
+    string constant DoesNotOwnTheAdventureDeck =
+        "you do not own the adventure cards deck for this airdrop";
+    string constant IsNotAdventureCards = "msg.sender is not the Adventure Cards contract";
 }
 
-/// @title Loot Tokens
+/// @title Adventure Tokens
 /// @author Georgios Konstantopoulos
-/// @notice Allows "opening" your ERC721 Loot bags and extracting the items inside it
+/// @author Andreas Bigger
+/// @notice Allows unbundling your ERC721 Adventure Decks and extracting the items inside it
 /// The created tokens are ERC1155 compatible, and their on-chain SVG is their name
-contract LootLoose is ERC1155, LootTokensMetadata {
-    // The OG Loot bags contract
-    IERC721 immutable loot;
+contract AdventureLoose is ERC1155, AdventureTokensMetadata {
+    // The OG Adventure Cards contract
+    IERC721 immutable ac;
 
     // No need for a URI since we're doing everything onchain
     constructor(address _loot) ERC1155("") {
-        loot = IERC721(_loot);
+        ac = IERC721(_loot);
     }
 
     /// @notice Transfers the erc721 bag from your account to the contract and then
@@ -36,38 +43,40 @@ contract LootLoose is ERC1155, LootTokensMetadata {
     /// just transferring directly to the contract and letting the `onERC721Received`
     /// do its part
     function open(uint256 tokenId) external {
-        loot.safeTransferFrom(msg.sender, address(this), tokenId);
+        ac.safeTransferFrom(msg.sender, address(this), tokenId);
     }
 
     /// @notice Claims an airdrop for a token owned by LootLoose. The airdrop is then
     /// claimable by the owner of the reassembled pieces.
-    function claimAirdropForLootLoose(ILootAirdrop airdrop, uint256 tokenId) external payable {
+    function claimAirdropForLootLoose(ILootAirdrop airdrop, uint256 tokenId)
+        external
+        payable
+    {
         airdrop.claimForLoot{value: msg.value}(tokenId);
     }
 
     /// @notice Allows you to claim an airdrop that has already been claimed by LootLoose
     /// if you are the owner of the ERC721 bag the airdrop corresponds to
     function claimAirdrop(ILootAirdrop airdrop, uint256 tokenId) external {
-        require(loot.ownerOf(tokenId) == msg.sender, Errors.DoesNotOwnLootbag);
+        require(ac.ownerOf(tokenId) == msg.sender, Errors.DoesNotOwnTheAdventureDeck);
         airdrop.safeTransferFrom(address(this), msg.sender, tokenId);
     }
 
-    /// @notice ERC721 callback which will open the bag
+    /// @notice ERC721 callback which will unbundle the deck
     function onERC721Received(
         address,
         address from,
         uint256 tokenId,
         bytes calldata
     ) external returns (bytes4) {
-        // only supports callback from the Loot contract
-        require(msg.sender == address(loot), Errors.IsNotLoot);
-        open(from, tokenId);
+        // only supports callback from the Adventure Cards contract
+        require(msg.sender == address(ac), Errors.IsNotAdventureCards);
+        unbundle(from, tokenId);
         return LootLoose.onERC721Received.selector;
     }
 
-    /// @notice Opens your Loot bag and mints you 8 ERC-1155 tokens for each item
-    /// in that bag
-    function open(address who, uint256 tokenId) private {
+    /// @notice Unbundles your Adventure Cards Deck and mints you 45 ERC-1155 tokens for each item in that deck
+    function unbundle(address who, uint256 tokenId) private {
         // NB: We patched ERC1155 to expose `_balances` so
         // that we can manually mint to a user, and manually emit a `TransferBatch`
         // event. If that's unsafe, we can fallback to using _mint
@@ -90,7 +99,7 @@ contract LootLoose is ERC1155, LootTokensMetadata {
         emit TransferBatch(_msgSender(), address(0), who, ids, amounts);
     }
 
-    /// @notice Re-assembles the original Loot bag by burning all the ERC1155 tokens
+    /// @notice Re-assembles the original Adventure Cards Deck by burning all the ERC1155 tokens
     /// which were inside of it. Because ERC1155 tokens are fungible, you can give it
     /// any token that matches the one that was originally in it (i.e. you don't need to
     /// give it the exact e.g. Divine Robe that was created during minting.
@@ -106,7 +115,7 @@ contract LootLoose is ERC1155, LootTokensMetadata {
         burnItem(tokenId, ringComponents, RING);
 
         // 2. give back the bag
-        loot.safeTransferFrom(address(this), msg.sender, tokenId);
+        ac.safeTransferFrom(address(this), msg.sender, tokenId);
     }
 
     function itemId(

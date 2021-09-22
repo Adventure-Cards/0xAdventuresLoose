@@ -14,7 +14,7 @@ in the bag
 Each ERC1155's token URI is a b64 encoded SVG image, with the item's name (just that item's, not
 any other item from the bag that contained it).
 
-You can mint the 8 ERC-1155 tokens via 2 ways:
+You can mint the 45 ERC-1155 tokens via 2 ways:
 1. `approve` the `AdventureLoose.sol` contract to spend your NFT (or via `setApprovalForAll`) and calling `open`.
 2. Transferring your NFT directly to the contract, triggerring the `onERC721Received` callback
 
