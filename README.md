@@ -4,6 +4,8 @@
 
 **Split your [0xAdventures](https://0xadventures.com/) decks.**
 
+**0xAdventures Contract: `0x329Fd5E0d9aAd262b13CA07C87d001bec716ED39`**
+
 ![Github Actions](https://github.com/abigger87/0xAdventuresLoose/workflows/Tests/badge.svg)
 
 0xAdventuresLoose is an ERC-1155 contract which allows you to:
