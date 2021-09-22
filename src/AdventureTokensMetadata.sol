@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.0;
 
-import "./LootComponents.sol";
+import "./AdventureComponents.sol";
 import "./TokenId.sol";
 import {Base64, toString} from "./MetadataUtils.sol";
 
