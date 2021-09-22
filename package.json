@@ -1,9 +1,9 @@
 {
-  "name": "lootloose",
-  "author": "Georgios Konstantopoulos",
+  "name": "0xAdventuresLoose",
+  "author": "Andreas Bigger",
   "license": "GPL-3.0-or-later",
   "version": "1.0.0",
-  "description": "Split your lootbags in their individual pieces",
+  "description": "Split your 0xAdventures decks.",
   "files": [
     "*.sol"
   ],
