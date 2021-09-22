@@ -1,13 +1,11 @@
 /**
- *Submitted for verification at Etherscan.io on 2021-08-30
+ * Submitted for verification at Etherscan.io on TODO: __-__-_____
  */
 
 // SPDX-License-Identifier: Unlicense
 
 /*
-
-    LootComponents.sol
-    
+    AdventureComponents.sol
     This is a utility contract to make it easier for other
     contracts to work with Loot properties.
     
@@ -29,7 +27,7 @@
 
 pragma solidity ^0.8.4;
 
-contract LootComponents {
+contract AdventureComponents {
     string[] internal weapons = [
         "Warhammer", // 0
         "Quarterstaff", // 1
