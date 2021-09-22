@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./utils/LootLooseSetup.sol";
-import "./utils/LootAirdrop.sol";
-import {ILootAirdrop} from "../LootLoose.sol";
-import {ItemNames} from "../LootTokensMetadata.sol";
+import "./utils/AdventureLooseSetup.sol";
+import "./utils/AdventureAirdrop.sol";
+import { IAdventureAirdrop } from "../AdventureLoose.sol";
+import { ItemNames } from "../AdventureTokensMetadata.sol";
 
 struct Attribute {
     string traitType;
@@ -18,7 +18,7 @@ struct Data {
     Attribute[] attributes;
 }
 
-contract Metadata is LootLooseTest {
+contract Metadata is AdventureLooseTest {
     function testKatanaBagNames() public {
         ItemNames memory expected = ItemNames({
             weapon: "Katana",
@@ -33,7 +33,7 @@ contract Metadata is LootLooseTest {
 
         // https://opensea.io/assets/0xff9c1b15b16263c61d017ee9f65c50e4ae0113d7/5726
         uint256 id = 5726;
-        ItemNames memory names = lootLoose.names(id);
+        ItemNames memory names = acLoose.names(id);
         assertEq(names, expected);
     }
 
@@ -51,12 +51,12 @@ contract Metadata is LootLooseTest {
 
         // https://opensea.io/assets/0xff9c1b15b16263c61d017ee9f65c50e4ae0113d7/5726
         uint256 id = 3686;
-        ItemNames memory names = lootLoose.names(id);
+        ItemNames memory names = acLoose.names(id);
         assertEq(names, expected);
     }
 
     function testBronzeRingOfEnlightenmentMetadata() public {
-        uint256 id = lootLoose.ringId(2169);
+        uint256 id = acLoose.ringId(2169);
         Attribute[] memory attributes = new Attribute[](3);
         attributes[0] = Attribute("Slot", "Ring");
         attributes[1] = Attribute("Item", "Bronze Ring");
@@ -65,7 +65,7 @@ contract Metadata is LootLooseTest {
     }
 
     function testDivineRobeMetadata() public {
-        uint256 id = lootLoose.chestId(3686);
+        uint256 id = acLoose.chestId(3686);
         Attribute[] memory attributes = new Attribute[](2);
         attributes[0] = Attribute("Slot", "Chest");
         attributes[1] = Attribute("Item", "Divine Robe");
@@ -73,7 +73,7 @@ contract Metadata is LootLooseTest {
     }
 
     function testTempestGraspGlovesOfProtectionPlusOneMetadata() public {
-        uint256 id = lootLoose.handId(3686);
+        uint256 id = acLoose.handId(3686);
         Attribute[] memory attributes = new Attribute[](6);
         attributes[0] = Attribute("Slot", "Hand");
         attributes[1] = Attribute("Item", "Gloves");
@@ -93,7 +93,7 @@ contract Metadata is LootLooseTest {
         Attribute[] memory attributes,
         string memory name
     ) private {
-        string memory meta = lootLoose.uri(tokenId);
+        string memory meta = acLoose.uri(tokenId);
         string[] memory inputs = new string[](3);
         inputs[0] = "node";
         inputs[1] = "scripts/metadata.js";

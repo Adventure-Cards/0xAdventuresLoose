@@ -1,30 +1,30 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./utils/LootLooseSetup.sol";
-import "./utils/LootAirdrop.sol";
-import {ILootAirdrop} from "../LootLoose.sol";
-import {ItemIds} from "../LootTokensMetadata.sol";
+import "./utils/AdventureLooseSetup.sol";
+import "./utils/AdventureAirdrop.sol";
+import { IAdventureAirdrop } from "../AdventureLoose.sol";
+import { ItemIds } from "../AdventureTokensMetadata.sol";
 
-contract ERC721Callback is LootLooseTest {
+contract ERC721Callback is AdventureLooseTest {
     function testCannotCallOnERC721ReceivedDirectly() public {
         try
-            lootLoose.onERC721Received(address(0), address(0), 0, "0x")
+            acLoose.onERC721Received(address(0), address(0), 0, "0x")
         {} catch Error(string memory error) {
-            assertEq(error, Errors.IsNotLoot);
+            assertEq(error, Errors.IsNotAdventureCards);
         }
     }
 }
 
-contract Open is LootLooseTest {
+contract Open is AdventureLooseTest {
     function testCanOpenBag() public {
         alice.open(BAG);
-        assertEq(loot.ownerOf(BAG), address(lootLoose));
+        assertEq(ac.ownerOf(BAG), address(acLoose));
     }
 
     function testCanOpenBagWithApproval() public {
         alice.openWithApproval(BAG);
-        assertEq(loot.ownerOf(BAG), address(lootLoose));
+        assertEq(ac.ownerOf(BAG), address(acLoose));
         checkOwns1155s(BAG, address(alice));
     }
 
@@ -34,25 +34,25 @@ contract Open is LootLooseTest {
 
     // helper for checking ownership of erc1155 tokens after unbundling a bag
     function checkOwns1155s(uint256 tokenId, address who) private {
-        ItemIds memory ids = lootLoose.ids(tokenId);
-        assertEq(lootLoose.balanceOf(who, ids.weapon), 1);
-        assertEq(lootLoose.balanceOf(who, ids.chest), 1);
-        assertEq(lootLoose.balanceOf(who, ids.head), 1);
-        assertEq(lootLoose.balanceOf(who, ids.waist), 1);
-        assertEq(lootLoose.balanceOf(who, ids.foot), 1);
-        assertEq(lootLoose.balanceOf(who, ids.hand), 1);
-        assertEq(lootLoose.balanceOf(who, ids.neck), 1);
-        assertEq(lootLoose.balanceOf(who, ids.ring), 1);
+        ItemIds memory ids = acLoose.ids(tokenId);
+        assertEq(acLoose.balanceOf(who, ids.weapon), 1);
+        assertEq(acLoose.balanceOf(who, ids.chest), 1);
+        assertEq(acLoose.balanceOf(who, ids.head), 1);
+        assertEq(acLoose.balanceOf(who, ids.waist), 1);
+        assertEq(acLoose.balanceOf(who, ids.foot), 1);
+        assertEq(acLoose.balanceOf(who, ids.hand), 1);
+        assertEq(acLoose.balanceOf(who, ids.neck), 1);
+        assertEq(acLoose.balanceOf(who, ids.ring), 1);
     }
 }
 
-contract Reassemble is LootLooseTest {
-    LootLooseUser internal bob;
+contract Reassemble is AdventureLooseTest {
+    AdventureLooseUser internal bob;
 
     function setUp() public override {
         super.setUp();
 
-        bob = new LootLooseUser(loot, lootLoose);
+        bob = new AdventureLooseUser(ac, acLoose);
         bob.claim(OTHER_BAG);
         bob.open(OTHER_BAG);
 
@@ -62,10 +62,10 @@ contract Reassemble is LootLooseTest {
     // Reassembling does not require `setsApprovalForAll`
     function testCanReassemble() public {
         alice.reassemble(BAG);
-        assertEq(loot.ownerOf(BAG), address(alice));
+        assertEq(ac.ownerOf(BAG), address(alice));
 
         bob.reassemble(OTHER_BAG);
-        assertEq(loot.ownerOf(OTHER_BAG), address(bob));
+        assertEq(ac.ownerOf(OTHER_BAG), address(bob));
     }
 
     function testCannotReassembleBagYouDoNotOwn() public {
@@ -75,7 +75,7 @@ contract Reassemble is LootLooseTest {
     }
 
     function testCannotReassembleWithoutOwningAllPieces() public {
-        uint256 id = lootLoose.weaponId(BAG);
+        uint256 id = acLoose.weaponId(BAG);
         alice.transferERC1155(address(bob), id, 1);
         try alice.reassemble(BAG) { fail(); } catch Error(string memory error) {
             assertEq(error, "ERC1155: burn amount exceeds balance");
@@ -83,26 +83,26 @@ contract Reassemble is LootLooseTest {
     }
 }
 
-contract Airdrop is LootLooseTest {
-    LootAirdrop airdrop;
+contract Airdrop is AdventureLooseTest {
+    AdventureAirdrop airdrop;
 
     function setUp() public override {
         super.setUp();
-        airdrop = new LootAirdrop(address(loot));
+        airdrop = new AdventureAirdrop(address(ac));
         alice.open(BAG);
     }
 
-    function testCanClaimAirdropForLootLoose() public {
-        lootLoose.claimAirdropForLootLoose{value: 1 ether}(
-            ILootAirdrop(address(airdrop)),
+    function testCanClaimAirdropForAdventureLoose() public {
+        acLoose.claimAirdropForAdventureLoose{value: 1 ether}(
+            IAdventureAirdrop(address(airdrop)),
             BAG
         );
-        assertEq(airdrop.ownerOf(BAG), address(lootLoose));
+        assertEq(airdrop.ownerOf(BAG), address(acLoose));
     }
 
     function testCanClaimAirdrop() public {
-        lootLoose.claimAirdropForLootLoose{value: 1 ether}(
-            ILootAirdrop(address(airdrop)),
+        acLoose.claimAirdropForAdventureLoose{value: 1 ether}(
+            IAdventureAirdrop(address(airdrop)),
             BAG
         );
         alice.reassemble(BAG);
@@ -111,22 +111,22 @@ contract Airdrop is LootLooseTest {
     }
 
     function testCannotClaimAirdropIfNotOwner() public {
-        lootLoose.claimAirdropForLootLoose{value: 1 ether}(
-            ILootAirdrop(address(airdrop)),
+        acLoose.claimAirdropForAdventureLoose{value: 1 ether}(
+            IAdventureAirdrop(address(airdrop)),
             BAG
         );
 
         try alice.claimAirdrop(address(airdrop), BAG) { fail(); } catch Error(
             string memory error
         ) {
-            assertEq(error, Errors.DoesNotOwnLootbag);
+            assertEq(error, Errors.DoesNotOwnTheAdventureDeck);
         }
     }
 
     function testCannotClaimAirdropWithoutEnoughMoney() public {
         try
-            lootLoose.claimAirdropForLootLoose{value: 0.8 ether}(
-                ILootAirdrop(address(airdrop)),
+            acLoose.claimAirdropForAdventureLoose{value: 0.8 ether}(
+                IAdventureAirdrop(address(airdrop)),
                 BAG
             )
         {} catch Error(string memory error) {
@@ -137,8 +137,8 @@ contract Airdrop is LootLooseTest {
     function testCannotClaimAirdropForUnopenedBags() public {
         alice.claim(OTHER_BAG);
         try
-            lootLoose.claimAirdropForLootLoose{value: 1 ether}(
-                ILootAirdrop(address(airdrop)),
+            acLoose.claimAirdropForAdventureLoose{value: 1 ether}(
+                IAdventureAirdrop(address(airdrop)),
                 OTHER_BAG
             )
         {} catch Error(string memory error) {
